@@ -1,0 +1,5 @@
+s = input()
+s = s.split()
+a = list(map(int, s))
+result = list(filter(lambda x: x % 19 == 0 or x % 13 == 0, a))
+print(result)
