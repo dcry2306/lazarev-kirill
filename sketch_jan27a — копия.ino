@@ -1,44 +1,40 @@
-#include <SoftwareSerial.h>
+const int resistorPin1 = A0;
+const int resistorPin2 = A1;
+const int resistorPin3 = A2;
+const int resistorPin4 = A3;
+const int resistorPin5 = A4;
 
-const int photoResistorPin1 = A0;
-const int photoResistorPin2 = A1;
-const int photoResistorPin3 = A2;
-const int photoResistorPin4 = A3;
-const int photoResistorPin5 = A4;
-
-SoftwareSerial bluetoothSerial(0, 1); // RX, TX
+int resistorValue1 = 0;
+int resistorValue2 = 0;
+int resistorValue3 = 0;
+int resistorValue4 = 0;
+int resistorValue5 = 0;
 
 void setup() {
   Serial.begin(9600);
-  bluetoothSerial.begin(9600); // Скорость соединения Bluetooth
 }
 
 void loop() {
-  int sensorValue1 = analogRead(photoResistorPin1);
-  int sensorValue2 = analogRead(photoResistorPin2);
-  int sensorValue3 = analogRead(photoResistorPin3);
-  int sensorValue4 = analogRead(photoResistorPin4);
-  int sensorValue5 = analogRead(photoResistorPin5);
+  resistorValue1 = analogRead(resistorPin1);
+  resistorValue2 = analogRead(resistorPin2);
+  resistorValue3 = analogRead(resistorPin3);
+  resistorValue4 = analogRead(resistorPin4);
+  resistorValue5 = analogRead(resistorPin5);
 
-  if (sensorValue1 > 500) {
-    bluetoothSerial.println("A1");
+  if (resistorValue1 > 300) {
+    Serial.println("A1");
   }
 
-  if (sensorValue2 > 500) {
-    bluetoothSerial.println("A2");
-  }
+  // Send values over Bluetooth
+  Serial.print(resistorValue1);
+  Serial.print(",");
+  Serial.print(resistorValue2);
+  Serial.print(",");
+  Serial.print(resistorValue3);
+  Serial.print(",");
+  Serial.print(resistorValue4);
+  Serial.print(",");
+  Serial.println(resistorValue5);
 
-  if (sensorValue3 > 500) {
-    bluetoothSerial.println("A3");
-  }
-
-  if (sensorValue4 > 500) {
-    bluetoothSerial.println("A4");
-  }
-
-  if (sensorValue5 > 500) {
-    bluetoothSerial.println("A5");
-  }
-
-  delay(1000); // Подождите секунду перед следующим чтением.
+  delay(1000);
 }
