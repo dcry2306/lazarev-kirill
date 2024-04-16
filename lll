@@ -1,0 +1,40 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial mySerial(2, 3); // RX, TX
+
+int photoResistor1 = A0;
+int photoResistor2 = A1;
+int photoResistor3 = A2;
+int photoResistor4 = A3;
+int photoResistor5 = A4;
+
+void setup() {
+Serial.begin(9600);
+mySerial.begin(9600);
+}
+
+void loop() {
+int val1 = analogRead(photoResistor1);
+int val2 = analogRead(photoResistor2);
+int val3 = analogRead(photoResistor3);
+int val4 = analogRead(photoResistor4);
+int val5 = analogRead(photoResistor5);
+
+if(val1 < 500) {
+mySerial.print("A1");
+}
+if(val2 < 500) {
+mySerial.print("A2");
+}
+if(val3 < 500) {
+mySerial.print("A3");
+}
+if(val4 < 500) {
+mySerial.print("A4");
+}
+if(val5 < 500) {
+mySerial.print("A5");
+}
+
+delay(1000);
+}
