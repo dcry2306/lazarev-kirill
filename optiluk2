@@ -1,0 +1,49 @@
+import tkinter as tk
+import serial
+
+class App(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self.values = {f"A{i}": tk.StringVar() for i in range(1, 6)}
+        self.arduino_port = 'COM14'  # Укажи порт, к которому подключена Arduino
+
+        try:
+            self.arduino = serial.Serial(self.arduino_port, 9600)
+            self.after(100, self.update_values)
+        except serial.SerialException as e:
+            print("Error opening serial port:", str(e))
+
+        self.configure_gui()
+
+    def configure_gui(self):
+        self.attributes('-fullscreen', True)
+        self.title("Hatch Status")
+
+        for i, hatch in enumerate(self.values.keys()):
+            frame = tk.Frame(self, borderwidth=2, relief="groove")
+            frame.grid(row=i, column=0, padx=10, pady=10, sticky="nsew")
+
+            label = tk.Label(frame, text=f"Люк {hatch} состояние:", font=('Arial', 18))
+            label.grid(row=0, column=0, padx=10, pady=5)
+
+            status_label = tk.Label(frame, textvariable=self.values[hatch], font=('Arial', 16))
+            status_label.grid(row=1, column=0, padx=10, pady=5)
+
+        clear_button = tk.Button(self, text="Сброс состояния", command=self.clear_values, bg='red', fg='white', font=('Arial', 16))
+        clear_button.grid(row=len(self.values), column=0, padx=10, pady=10)
+
+    def update_values(self):
+        if self.arduino.in_waiting > 0:
+            value = self.arduino.readline().decode().strip()
+            if value in self.values:
+                self.values[value].set(f"Люк {value} открыт")
+
+        self.after(100, self.update_values)
+
+    def clear_values(self):
+        for value in self.values.values():
+            value.set("")
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
