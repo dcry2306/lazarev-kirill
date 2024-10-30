@@ -10,42 +10,58 @@ char message[32] = {0}; // buffer for received messages
 // Создаем программный последовательный порт для общения с модулем GSM
 SoftwareSerial gsmSerial(6, 7); // RX, TX
 
+const int photoPin = A0;  // Пин, к которому подключен фоторезистор
+const int lightThreshold = 995; // Пороговое значение для детекции света
+
 void setup() {
-Serial.begin(9600);
-radio.begin();
-radio.openReadingPipe(0,address);
-radio.startListening();
+  Serial.begin(9600);
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.startListening();
 
-// Начинаем последовательную связь с GSM модулем
-gsmSerial.begin(9600);
+  // Начинаем последовательную связь с GSM модулем
+  gsmSerial.begin(9600);
 
-// Даем время модулю GSM для инициализации
-delay(1000);
+  // Даем время модулю GSM для инициализации
+  delay(1000);
 
-// Отправляем SMS
-sendSMS("+79114577502", "test1.");
+  // Автовключение GSM-модуля
+  gsmSerial.println("AT");
+  delay(1000);
+  gsmSerial.println("AT+CFUN=1");  // Включаем модуль, если был выключен
+  delay(1000);
 }
 
 void loop() {
-if (radio.available()) {
-radio.read(message, sizeof(message));
-Serial.println(message);
+  // Чтение данных от фоторезистора
+  int lightValue = analogRead(photoPin);
 
-// Отправляем SMS с полученным сообщением
-sendSMS("+79114577502", message);
-} else {
-delay(10); // wait for 10ms before checking again
-}
+  // Проверка уровня света и отправка сообщения, если свет выше порога
+  if (lightValue < lightThreshold) {
+    sendSMS("+79114577502", "vzlom-main");
+    delay(10000); // Задержка, чтобы не отправлять SMS слишком часто
+  }
 
-// Печатаем ответ модема на монитор последовательного порта
-while (gsmSerial.available()) {
-Serial.write(gsmSerial.read());
-}
+  // Проверяем доступность сообщения по радиоканалу
+  if (radio.available()) {
+    radio.read(message, sizeof(message));
+    Serial.println(message);
 
-// Печатаем данные с монитора последовательного порта на GSM модем
-while (Serial.available()) {
-gsmSerial.write(Serial.read());
-}
+    // Отправляем SMS с полученным сообщением
+    sendSMS("+79114577502", message);
+  } else {
+    delay(10); // ждем 10 мс перед повторной проверкой
+  }
+
+  // Печатаем ответ модема на монитор последовательного порта
+  while (gsmSerial.available()) {
+    Serial.write(gsmSerial.read());
+  }
+
+  // Печатаем данные с монитора последовательного порта на GSM модем
+  while (Serial.available()) {
+    gsmSerial.write(Serial.read());
+  }
 }
 
 // Функция для отправки SMS
